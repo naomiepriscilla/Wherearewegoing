@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Surprise Trip Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            background: #f5f3f0; min-height: 100vh; padding: 40px 20px;
+            color: #4a4a4a; line-height: 1.6;
+        }
+        .container {
+            max-width: 700px; margin: 0 auto; background: #fff; border-radius: 2px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.06); overflow: hidden;
+        }
+        .header { background: #e8e4df; padding: 60px 40px; text-align: center; border-bottom: 1px solid #d4cfc7; }
+        h1 { font-size: 2.2em; margin-bottom: 12px; font-weight: 300; letter-spacing: 2px; color: #3a3a3a; }
+        .subtitle { font-size: 1em; color: #7a7a7a; font-weight: 300; letter-spacing: 1px; }
+        .content { padding: 60px 40px; }
+        .form-view, .preview-view { display: none; }
+        .form-view.active, .preview-view.active { display: block; }
+        .form-section { margin-bottom: 35px; }
+        .form-section h2 { color: #3a3a3a; font-size: 0.9em; margin-bottom: 15px; font-weight: 400; letter-spacing: 1px; text-transform: uppercase; }
+        label { display: block; margin-bottom: 8px; color: #6a6a6a; font-size: 0.9em; }
+        input[type="text"], input[type="date"], input[type="number"], input[type="file"], textarea {
+            width: 100%; padding: 12px; border: 1px solid #e8e4df; background: #f9f7f4; font-size: 0.95em; font-family: inherit; margin-bottom: 15px; transition: border-color 0.3s;
+        }
+        .item-entry { display: flex; gap: 10px; margin-bottom: 10px; }
+        .item-entry input { flex: 1; margin-bottom: 0; }
+        .remove-btn { background: #d4cfc7; border: none; padding: 12px 16px; cursor: pointer; color: #5a5a5a; }
+        .add-btn { background: #e8e4df; border: none; padding: 10px 20px; cursor: pointer; color: #5a5a5a; font-size: 0.85em; letter-spacing: 1px; text-transform: uppercase; width: 100%; margin-bottom: 10px; }
+        .primary-btn { background: #3a3a3a; color: #fff; width: 100%; padding: 15px; border: none; cursor: pointer; font-size: 0.9em; letter-spacing: 1px; text-transform: uppercase; }
+        .date-box { background: #f9f7f4; border: 1px solid #e8e4df; padding: 40px 20px; text-align: center; margin: 25px 0; }
+        .big-date { font-size: 3em; font-weight: 200; color: #3a3a3a; }
+        .preview-image { width: 100%; max-height: 400px; object-fit: cover; margin-bottom: 30px; border: 1px solid #e8e4df; display: none; }
+        .countdown { background: #fff; padding: 30px 20px; margin-top: 20px; border: 1px solid #e8e4df; display: flex; justify-content: center; gap: 30px; }
+        .countdown-item { text-align: center; }
+        .countdown-value { font-size: 2.5em; font-weight: 200; display: block; }
+        .countdown-label { font-size: 0.75em; color: #9a9a9a; text-transform: uppercase; }
+        .footer { background: #f9f7f4; padding: 40px; text-align: center; color: #7a7a7a; border-top: 1px solid #e8e4df; }
+        ul { list-style: none; padding-left: 0; }
+        li { padding: 14px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SURPRISE TRIP REVEAL</h1>
+            <p class="subtitle">CREATE YOUR PERSONALIZED REVEAL</p>
+        </div>
+
+        <div class="content">
+            <div class="form-view active">
+                <div class="form-section">
+                    <h2>Destination Visual</h2>
+                    <label>Upload a Hint Photo</label>
+                    <input type="file" id="imageUpload" accept="image/*">
+                </div>
+
+                <div class="form-section">
+                    <h2>Trip Dates</h2>
+                    <label>Start Date</label>
+                    <input type="date" id="startDate" required>
+                    <label>End Date</label>
+                    <input type="date" id="endDate" required>
+                    <label>Additional Date Details</label>
+                    <input type="text" id="dateDetails" placeholder="e.g., We'll be leaving Friday afternoon">
+                </div>
+
+                <div class="form-section">
+                    <h2>What to Wear</h2>
+                    <div id="wearList"></div>
+                    <button class="add-btn" id="addWearBtn">+ Add Clothing Item</button>
+                </div>
+
+                <div class="form-section">
+                    <h2>What to Bring</h2>
+                    <div id="bringList"></div>
+                    <button class="add-btn" id="addBringBtn">+ Add Essential Item</button>
+                </div>
+
+                <div class="form-section">
+                    <h2>A Few Hints</h2>
+                    <div id="hintsList"></div>
+                    <button class="add-btn" id="addHintBtn">+ Add Mystery Hint</button>
+                </div>
+
+                <button class="primary-btn" id="generateBtn">Generate Preview</button>
+            </div>
+
+            <div class="preview-view">
+                <img id="previewImage" class="preview-image" alt="Preview image">
+
+                <div class="section">
+                    <h2>When We're Going</h2>
+                    <div class="date-box">
+                        <div class="big-date" id="previewDateRange"></div>
+                        <div class="month-year" id="previewMonthYear"></div>
+                    </div>
+                    <p id="previewDateDetails"></p>
+
+                    <div class="countdown">
+                        <div class="countdown-item"><span class="countdown-value" id="days">--</span><span class="countdown-label">Days</span></div>
+                        <div class="countdown-item"><span class="countdown-value" id="hours">--</span><span class="countdown-label">Hours</span></div>
+                        <div class="countdown-item"><span class="countdown-value" id="minutes">--</span><span class="countdown-label">Mins</span></div>
+                        <div class="countdown-item"><span class="countdown-value" id="seconds">--</span><span class="countdown-label">Secs</span></div>
+                    </div>
+                </div>
+
+                <div class="section" style="margin-top: 40px;">
+                    <h2>What to Wear</h2>
+                    <ul id="previewWearList"></ul>
+                </div>
+
+                <div class="section" style="margin-top: 40px;">
+                    <h2>What to Bring</h2>
+                    <ul id="previewBringList"></ul>
+                </div>
+
+                <div class="section" style="margin-top: 40px;">
+                    <h2>Mystery Hints</h2>
+                    <ul id="previewHintsList"></ul>
+                </div>
+
+                <div style="margin-top: 40px;">
+                    <button class="primary-btn" id="editBtn">Edit Details</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p id="footerText1">All you need to do is be ready.</p>
+        </div>
+    </div>
+
+    <script>
+        // Data populated with default options from your source file
+        let tripData = {
+            startDate: '',
+            endDate: '',
+            dateDetails: '',
+            imageUrl: '',
+            wearItems: [
+                "Comfortable walking shoes (we'll be exploring)",
+                "Smart casual outfits for dinner",
+                "Layers — a warm jacket and sweaters"
+            ],
+            bringItems: [
+                "Your passport or ID",
+                "Phone charger",
+                "Any medications you need"
+            ],
+            hints: [
+                "We'll be staying somewhere special",
+                "There will be incredible food involved",
+                "History, culture, and beauty await"
+            ]
+        };
+
+        let countdownInterval = null;
+        let imageReadInProgress = false;
+
+        // Generic helpers for list rendering & mutation
+        function renderList(array, containerId, placeholder, propName) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = array.map((item, i) => `
+                <div class="item-entry" data-index="${i}">
+                    <input type="text" value="${escapeHtml(item)}" data-prop="${propName}" data-index="${i}" placeholder="${placeholder}">
+                    <button class="remove-btn" data-prop="${propName}" data-index="${i}">×</button>
+                </div>
+            `).join('');
+
+            // Attach event listeners (safer than inline handlers)
+            container.querySelectorAll('input[type="text"]').forEach(inp => {
+                inp.addEventListener('input', (e) => {
+                    const idx = Number(inp.getAttribute('data-index'));
+                    tripData[propName][idx] = inp.value;
+                });
+            });
+            container.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = Number(btn.getAttribute('data-index'));
+                    tripData[propName].splice(idx, 1);
+                    renderAllLists();
+                });
+            });
+        }
+
+        function escapeHtml(unsafe) {
+            if (unsafe == null) return '';
+            return String(unsafe)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function renderAllLists() {
+            renderList(tripData.wearItems, 'wearList', 'Clothing item', 'wearItems');
+            renderList(tripData.bringItems, 'bringList', 'Essential item', 'bringItems');
+            renderList(tripData.hints, 'hintsList', 'Hint', 'hints');
+        }
+
+        // Add item handlers
+        document.getElementById('addWearBtn').addEventListener('click', () => { tripData.wearItems.push(''); renderAllLists(); });
+        document.getElementById('addBringBtn').addEventListener('click', () => { tripData.bringItems.push(''); renderAllLists(); });
+        document.getElementById('addHintBtn').addEventListener('click', () => { tripData.hints.push(''); renderAllLists(); });
+
+        // Image upload handling
+        const imageInput = document.getElementById('imageUpload');
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            imageReadInProgress = true;
+            reader.onloadend = function() {
+                tripData.imageUrl = reader.result;
+                imageReadInProgress = false;
+                // If we are in preview view, update preview image immediately
+                const img = document.getElementById('previewImage');
+                if (document.querySelector('.preview-view').classList.contains('active')) {
+                    img.src = tripData.imageUrl;
+                    img.style.display = 'block';
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Generate Preview
+        document.getElementById('generateBtn').addEventListener('click', generatePreview);
+        function generatePreview() {
+            tripData.startDate = document.getElementById('startDate').value;
+            tripData.endDate = document.getElementById('endDate').value;
+            tripData.dateDetails = document.getElementById('dateDetails').value;
+
+            if (!tripData.startDate || !tripData.endDate) {
+                return alert("Please select both start and end dates.");
+            }
+
+            const start = new Date(tripData.startDate);
+            const end = new Date(tripData.endDate);
+            if (isNaN(start) || isNaN(end)) {
+                return alert("Invalid dates selected.");
+            }
+            if (start > end) {
+                return alert("Start date must be on or before the end date.");
+            }
+
+            if (imageReadInProgress) {
+                return alert("Image is still loading. Please wait a moment and try again.");
+            }
+
+            // Format date range elegantly
+            const sameMonth = start.getFullYear() === end.getFullYear() && start.getMonth() === end.getMonth();
+            const startDay = start.getDate();
+            const endDay = end.getDate();
+            const monthYear = start.toLocaleString('default', { month: 'long', year: 'numeric' }).toUpperCase();
+            const dateRangeText = sameMonth ? `${startDay}—${endDay}` : `${start.getDate()} ${start.toLocaleString('default', { month: 'short' })} — ${end.getDate()} ${end.toLocaleString('default', { month: 'short' })}`;
+
+            document.getElementById('previewDateRange').textContent = dateRangeText;
+            document.getElementById('previewMonthYear').textContent = monthYear;
+            document.getElementById('previewDateDetails').textContent = tripData.dateDetails || '';
+
+            // Image
+            const img = document.getElementById('previewImage');
+            if (tripData.imageUrl) {
+                img.src = tripData.imageUrl;
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+            }
+
+            // Lists
+            document.getElementById('previewWearList').innerHTML = tripData.wearItems.map(i => i ? `<li>${escapeHtml(i)}</li>` : '').join('');
+            document.getElementById('previewBringList').innerHTML = tripData.bringItems.map(i => i ? `<li>${escapeHtml(i)}</li>` : '').join('');
+            document.getElementById('previewHintsList').innerHTML = tripData.hints.map(i => i ? `<li>${escapeHtml(i)}</li>` : '').join('');
+
+            document.querySelector('.form-view').classList.remove('active');
+            document.querySelector('.preview-view').classList.add('active');
+
+            startCountdown();
+        }
+
+        // Edit button
+        document.getElementById('editBtn').addEventListener('click', editForm);
+        function editForm() {
+            // stop countdown updates to avoid multiple timers
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            document.querySelector('.preview-view').classList.remove('active');
+            document.querySelector('.form-view').classList.add('active');
+        }
+
+        // Countdown (shows days/hours/mins/secs)
+        function startCountdown() {
+            if (countdownInterval) clearInterval(countdownInterval);
+            function update() {
+                const now = new Date();
+                const target = new Date(tripData.startDate);
+                let diff = target - now;
+                if (isNaN(diff)) {
+                    document.getElementById('days').textContent = '--';
+                    document.getElementById('hours').textContent = '--';
+                    document.getElementById('minutes').textContent = '--';
+                    document.getElementById('seconds').textContent = '--';
+                    return;
+                }
+                if (diff <= 0) {
+                    document.getElementById('days').textContent = '0';
+                    document.getElementById('hours').textContent = '0';
+                    document.getElementById('minutes').textContent = '0';
+                    document.getElementById('seconds').textContent = '0';
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                    return;
+                }
+                const days = Math.floor(diff / 86400000);
+                diff -= days * 86400000;
+                const hours = Math.floor(diff / 3600000);
+                diff -= hours * 3600000;
+                const minutes = Math.floor(diff / 60000);
+                diff -= minutes * 60000;
+                const seconds = Math.floor(diff / 1000);
+
+                document.getElementById('days').textContent = String(days);
+                document.getElementById('hours').textContent = String(hours);
+                document.getElementById('minutes').textContent = String(minutes);
+                document.getElementById('seconds').textContent = String(seconds);
+            }
+            update();
+            countdownInterval = setInterval(update, 1000);
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            renderAllLists();
+
+            // Pre-fill inputs from tripData (if desired)
+            if (tripData.startDate) document.getElementById('startDate').value = tripData.startDate;
+            if (tripData.endDate) document.getElementById('endDate').value = tripData.endDate;
+            document.getElementById('dateDetails').value = tripData.dateDetails || '';
+        });
+    </script>
+</body>
+</html>
