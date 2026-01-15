@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise Trip Generator</title>
+    <style>
+        /* Styling maintained from original source */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f3f0;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #4a4a4a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 2px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #e8e4df;
+            padding: 60px 40px;
+            text-align: center;
+            border-bottom: 1px solid #d4cfc7;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 12px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #3a3a3a;
+        }
+
+        .subtitle {
+            font-size: 1em;
+            color: #7a7a7a;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .content {
+            padding: 60px 40px;
+        }
+
+        .form-view, .preview-view {
+            display: none;
+        }
+
+        .form-view.active, .preview-view.active {
+            display: block;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+        }
+
+        .form-section h2 {
+            color: #3a3a3a;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #6a6a6a;
+            font-size: 0.9em;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        input[type="file"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e8e4df;
+            background: #f9f7f4;
+            font-size: 0.95em;
+            font-family: inherit;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .item-entry {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .item-entry input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .remove-btn {
+            background: #d4cfc7;
+            border: none;
+            padding: 12px 16px;
+            cursor: pointer;
+            color: #5a5a5a;
+        }
+
+        .add-btn {
+            background: #e8e4df;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            color: #5a5a5a;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .primary-btn, .secondary-btn {
+            padding: 15px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            flex: 1;
+        }
+
+        .primary-btn { background: #3a3a3a; color: #ffffff; }
+        .secondary-btn { background: #e8e4df; color: #5a5a5a; }
+
+        .button-group { display: flex; gap: 15px; margin-top: 40px; }
+
+        .date-box {
+            background: #f9f7f4;
+            border: 1px solid #e8e4df;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .big-date { font-size: 3em; font-weight: 200; color: #3a3a3a; }
+
+        .preview-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            margin-bottom: 30px;
+            border: 1px solid #e8e4df;
+        }
+
+        .weather-hint { display: flex; gap: 15px; margin-top: 20px; }
+        .weather-card { flex: 1; background: #f9f7f4; padding: 30px 20px; text-align: center; border: 1px solid #e8e4df; }
+
+        .countdown {
+            background: #ffffff;
+            padding: 30px 20px;
+            margin-top: 20px;
+            border: 1px solid #e8e4df;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .countdown-item { text-align: center; }
+        .countdown-value { font-size: 2.5em; font-weight: 200; display: block; }
+        .countdown-label { font-size: 0.75em; color: #9a9a9a; text-transform: uppercase; }
+
+        .share-section {
+            background: #f9f7f4;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid #e8e4df;
+            text-align: center;
+        }
+
+        .share-url {
+            background: #ffffff;
+            padding: 12px;
+            border: 1px solid #e8e4df;
+            font-size: 0.85em;
+            word-break: break-all;
+            margin-bottom: 15px;
+        }
+
+        ul { list-style: none; padding: 0; }
+        li { padding: 14px 0; border-bottom: 1px solid #f0ede8; color: #5a5a5a; }
+        
+        .footer { background: #f9f7f4; padding: 40px; text-align: center; color: #7a7a7a; border-top: 1px solid #e8e4df; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SURPRISE TRIP REVEAL</h1>
+            <p class="subtitle">CREATE YOUR PERSONALIZED REVEAL</p>
+        </div>
+
+        <div class="content">
+            <div class="form-view active">
+                <div class="form-section">
+                    <h2>Destination Visual</h2>
+                    <label>Upload a Hint Photo</label>
+                    <input type="file" id="imageUpload" accept="image/*">
+                </div>
+                <div class="form-section">
+                    <h2>Trip Dates</h2>
+                    <input type="date" id="startDate" required>
+                    <input type="date" id="endDate" required>
+                    <input type="text" id="dateDetails" placeholder="Additional Details">
+                </div>
+                <div class="form-section">
+                    <h2>What to Wear</h2>
+                    <div id="wearList"></div>
+                    <button class="add-btn" onclick="addWearItem()">+ Add Item</button>
+                </div>
+                <div class="form-section">
+                    <h2>What to Bring</h2>
+                    <div id="bringList"></div>
+                    <button class="add-btn" onclick="addBringItem()">+ Add Item</button>
+                </div>
+                <div class="form-section">
+                    <h2>Hints</h2>
+                    <div id="hintsList"></div>
+                    <button class="add-btn" onclick="addHintItem()">+ Add Hint</button>
+                </div>
+                <button class="primary-btn" onclick="generatePreview()">Generate Preview & Share Link</button>
+            </div>
+
+            <div class="preview-view">
+                <img id="previewImage" class="preview-image" style="display:none;">
+                <div class="section">
+                    <h2>When We're Going</h2>
+                    <div class="date-box">
+                        <div class="big-date" id="previewDateRange"></div>
+                        <div class="month-year" id="previewMonthYear"></div>
+                    </div>
+                    <div class="countdown">
+                        <div class="countdown-item"><span class="countdown-value" id="days">--</span><span class="countdown-label">Days</span></div>
+                        <div class="countdown-item"><span class="countdown-value" id="hours">--</span><span class="countdown-label">Hours</span></div>
+                        <div class="countdown-item"><span class="countdown-value" id="minutes">--</span><span class="countdown-label">Mins</span></div>
+                    </div>
+                </div>
+
+                <div class="section" style="margin-top:40px">
+                    <h2>Trip Details</h2>
+                    <ul id="previewWearList"></ul>
+                    <ul id="previewBringList"></ul>
+                    <ul id="previewHintsList"></ul>
+                </div>
+
+                <div class="share-section" id="creatorTools">
+                    <h3>Share Your Surprise</h3>
+                    <p>Send this link to your partner. It will open in <strong>View-Only</strong> mode.</p>
+                    <div class="share-url" id="shareUrl"></div>
+                    <button class="primary-btn" onclick="copyToClipboard()">Copy View-Only Link</button>
+                </div>
+
+                <div class="button-group" id="editTools">
+                    <button class="secondary-btn" onclick="editForm()">Edit Details</button>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <p id="footerText">All you need to do is be ready.</p>
+        </div>
+    </div>
+
+    <script>
+        let tripData = {
+            startDate: '', endDate: '', dateDetails: '', imageUrl: '',
+            wearItems: ['Comfortable walking shoes'],
+            bringItems: ['Passport'],
+            hints: ['It will be special']
+        };
+
+        let countdownInterval;
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedData = urlParams.get('data');
+            const isViewOnly = urlParams.get('view') === '1';
+            
+            if (encodedData) {
+                try {
+                    tripData = JSON.parse(atob(encodedData));
+                    loadPreview();
+                    document.querySelector('.form-view').classList.remove('active');
+                    document.querySelector('.preview-view').classList.add('active');
+                    
+                    // If view-only mode, hide the creator's tools
+                    if (isViewOnly) {
+                        document.getElementById('creatorTools').style.display = 'none';
+                        document.getElementById('editTools').style.display = 'none';
+                        document.querySelector('.subtitle').textContent = "YOUR SURPRISE AWAITS";
+                    }
+                } catch (e) { initForm(); }
+            } else { initForm(); }
+        });
+
+        function initForm() { renderAllLists(); }
+
+        function renderList(list, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = list.map((item, i) => `
+                <div class="item-entry">
+                    <input type="text" value="${item}" onchange="tripData.${containerId}[${i}] = this.value">
+                    <button class="remove-btn" onclick="tripData.${containerId}.splice(${i}, 1); renderAllLists();">×</button>
+                </div>
+            `).join('');
+        }
+
+        function renderAllLists() {
+            renderList(tripData.wearItems, 'wearList');
+            renderList(tripData.bringItems, 'bringList');
+            renderList(tripData.hints, 'hintsList');
+        }
+
+        function addWearItem() { tripData.wearItems.push(''); renderAllLists(); }
+        function addBringItem() { tripData.bringItems.push(''); renderAllLists(); }
+        function addHintItem() { tripData.hints.push(''); renderAllLists(); }
+
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onloadend = () => { tripData.imageUrl = reader.result; };
+            if (file) reader.readAsDataURL(file);
+        });
+
+        function generatePreview() {
+            tripData.startDate = document.getElementById('startDate').value;
+            tripData.endDate = document.getElementById('endDate').value;
+            if(!tripData.startDate) return alert("Select a date");
+
+            loadPreview();
+            
+            // Generate the VIEW-ONLY URL
+            const urlData = btoa(JSON.stringify(tripData));
+            const shareableUrl = `${window.location.origin}${window.location.pathname}?data=${urlData}&view=1`;
+            document.getElementById('shareUrl').textContent = shareableUrl;
+
+            document.querySelector('.form-view').classList.remove('active');
+            document.querySelector('.preview-view').classList.add('active');
+        }
+
+        function loadPreview() {
+            const start = new Date(tripData.startDate);
+            document.getElementById('previewDateRange').textContent = start.getDate();
+            document.getElementById('previewMonthYear').textContent = start.toLocaleString('default', { month: 'long' }).toUpperCase();
+            
+            if (tripData.imageUrl) {
+                const img = document.getElementById('previewImage');
+                img.src = tripData.imageUrl;
+                img.style.display = 'block';
+            }
+
+            document.getElementById('previewWearList').innerHTML = tripData.wearItems.map(i => i ? `<li>Wear: ${i}</li>` : '').join('');
+            document.getElementById('previewBringList').innerHTML = tripData.bringItems.map(i => i ? `<li>Bring: ${i}</li>` : '').join('');
+            document.getElementById('previewHintsList').innerHTML = tripData.hints.map(i => i ? `<li>Hint: ${i}</li>` : '').join('');
+            
+            startCountdown();
+        }
+
+        function startCountdown() {
+            const update = () => {
+                const diff = new Date(tripData.startDate) - new Date();
+                if (diff > 0) {
+                    document.getElementById('days').textContent = Math.floor(diff / 864e5);
+                    document.getElementById('hours').textContent = Math.floor((diff % 864e5) / 36e5);
+                    document.getElementById('minutes').textContent = Math.floor((diff % 36e5) / 6e4);
+                }
+            };
+            update();
+            setInterval(update, 60000);
+        }
+
+        function copyToClipboard() {
+            navigator.clipboard.writeText(document.getElementById('shareUrl').textContent);
+            alert("View-only link copied!");
+        }
+
+        function editForm() {
+            document.querySelector('.preview-view').classList.remove('active');
+            document.querySelector('.form-view').classList.add('active');
+        }
+    </script>
+</body>
+</html>
